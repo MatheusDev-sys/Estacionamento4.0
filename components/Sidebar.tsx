@@ -29,7 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout }) =
     <aside className="w-64 bg-white h-screen fixed left-0 top-0 border-r border-gray-100 flex flex-col z-40">
       <div className="p-6 flex items-center gap-3">
         <div className="flex items-center">
-          <img src="/logo.png" alt="Centro 4.0" className="h-12 w-auto" />
+          <img src="logo.png" alt="Centro 4.0" className="h-24 w-auto" />
         </div>
       </div>
 
@@ -39,8 +39,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout }) =
             key={item.id}
             onClick={() => onNavigate(item.id)}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${activePage === item.id
-                ? 'bg-blue-600 text-white font-semibold shadow-lg shadow-blue-100'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+              ? 'bg-blue-600 text-white font-semibold shadow-lg shadow-blue-100'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
               }`}
           >
             <item.icon className={`w-5 h-5 ${activePage === item.id ? 'text-white' : 'text-gray-400'}`} />
