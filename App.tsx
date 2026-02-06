@@ -20,9 +20,12 @@ const App: React.FC = () => {
   const [publicProfileId, setPublicProfileId] = useState<string | null>(null);
 
   const checkUrlParams = () => {
+    // Detecta ?profile=ID na URL
     const params = new URLSearchParams(window.location.search);
     const profileId = params.get('profile');
+    
     if (profileId) {
+      console.log("Detectado Perfil Público via URL:", profileId);
       setPublicProfileId(profileId);
     } else {
       setPublicProfileId(null);
@@ -30,6 +33,10 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
+    // 1. Checar parâmetros da URL imediatamente
+    checkUrlParams();
+
+    // 2. Checar sessão do administrador
     async function checkUser() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
@@ -38,12 +45,19 @@ const App: React.FC = () => {
       setIsLoading(false);
     }
     
-    checkUrlParams();
     checkUser();
 
-    // Escutar mudanças na URL (histórico do navegador)
-    window.addEventListener('popstate', checkUrlParams);
-    return () => window.removeEventListener('popstate', checkUrlParams);
+    // Listener para mudanças de navegação (popstate)
+    const handleUrlChange = () => checkUrlParams();
+    window.addEventListener('popstate', handleUrlChange);
+    
+    // Intervalo de segurança para detectar mudanças via scripts sem recarga
+    const interval = setInterval(checkUrlParams, 300);
+
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleLogin = () => setIsAuthenticated(true);
@@ -56,25 +70,28 @@ const App: React.FC = () => {
 
   const handleBackFromPublic = () => {
     setPublicProfileId(null);
-    // Limpa o parâmetro da URL sem recarregar a página
+    // Remove o parâmetro da URL de forma limpa
     const url = new URL(window.location.href);
     url.searchParams.delete('profile');
     window.history.pushState({}, '', url.pathname);
   };
 
+  // PRIORIDADE MÁXIMA: Perfil Público (Não exige login)
   if (publicProfileId) {
     return <PublicProfile id={publicProfileId} onBack={handleBackFromPublic} />;
   }
 
+  // Estado de carregamento
   if (isLoading) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#F6F8FA]">
-        <div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em]">Sincronizando Centro 4.0</p>
+        <div className="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.5em]">Centro 4.0 Sincronizando</p>
       </div>
     );
   }
 
+  // Se não estiver logado, mostra tela de Login
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} />;
   }
