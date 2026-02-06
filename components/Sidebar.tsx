@@ -14,9 +14,11 @@ interface SidebarProps {
   activePage: string;
   onNavigate: (page: string) => void;
   onLogout: () => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout, isOpen, onClose }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'management', label: 'Gestão Geral', icon: Users },
