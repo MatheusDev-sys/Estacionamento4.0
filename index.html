@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <title>Centro 4.0 Parking Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #F6F8FA;
+        color: #1a202c;
+      }
+      h1, h2, h3, .font-poppins {
+        font-family: 'Poppins', sans-serif;
+      }
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      .bg-gradient-tech {
+        background: linear-gradient(135deg, #0B5ED7 0%, #19B5FE 100%);
+      }
+      
+      /* Animação de Borda Conic (Ultra-Moderna) */
+      @property --angle {
+        syntax: '<angle>';
+        initial-value: 0deg;
+        inherits: false;
+      }
+
+      @keyframes spin {
+        from { --angle: 0deg; }
+        to { --angle: 360deg; }
+      }
+
+      .animated-border {
+        position: relative;
+        background: white;
+      }
+
+      .animated-border::after, .animated-border::before {
+        content: '';
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        background-image: conic-gradient(from var(--angle), #0B5ED7, #19B5FE, #ffffff, #0B5ED7);
+        top: 50%;
+        left: 50%;
+        translate: -50% -50%;
+        z-index: -1;
+        padding: 4px;
+        border-radius: 64px;
+        animation: 4s spin linear infinite;
+      }
+
+      .animated-border::before {
+        filter: blur(1.5rem);
+        opacity: 0.5;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: #f1f1f1; }
+      ::-webkit-scrollbar-thumb { background: #0B5ED7; border-radius: 10px; }
+
+      /* Animação de entrada suave */
+      .reveal {
+        animation: reveal 1s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes reveal {
+        from { opacity: 0; transform: translateY(30px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.48.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

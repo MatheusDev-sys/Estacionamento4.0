@@ -1,0 +1,7 @@
+{
+  "name": "Centro 4.0 Parking Manager",
+  "description": "A premium, Industry 4.0-inspired administrative dashboard for smart parking management featuring real-time analytics, user control, and visitor voucher generation.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
