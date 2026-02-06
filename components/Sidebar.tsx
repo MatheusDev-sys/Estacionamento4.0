@@ -7,7 +7,8 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  ShieldCheck
+  ShieldCheck,
+  X
 } from 'lucide-react';
 
 interface SidebarProps {
