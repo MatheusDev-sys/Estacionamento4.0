@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Printer, Filter, Activity, FileText, PieChart as PieIcon, ShieldAlert, History, Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Reports: React.FC = () => {
   const [logs, setLogs] = useState<any[]>([]);
@@ -18,7 +20,7 @@ const Reports: React.FC = () => {
       try {
         const { data: logsData } = await supabase.from('audit_logs').select('*, profiles(name)').order('timestamp', { ascending: false }).limit(50);
         const { data: users } = await supabase.from('parking_users').select('type, valid_until');
-        
+
         if (logsData) {
           setLogs(logsData);
           setStats(prev => ({ ...prev, totalAlerts: logsData.length }));
@@ -28,9 +30,9 @@ const Reports: React.FC = () => {
           const now = new Date();
           const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000);
           const expiring = users.filter(u => u.valid_until && new Date(u.valid_until) > now && new Date(u.valid_until) <= twoHoursFromNow).length;
-          
-          setStats(prev => ({ 
-            ...prev, 
+
+          setStats(prev => ({
+            ...prev,
             visitors: users.filter(u => u.type === 'Visitante').length,
             expiringSoon: expiring
           }));
@@ -44,7 +46,77 @@ const Reports: React.FC = () => {
     fetchData();
   }, []);
 
-  const handlePrint = () => window.print();
+  const handleGeneratePDF = () => {
+    const doc = new jsPDF();
+
+    // Configuração de cores
+    const primaryColor = [11, 94, 215]; // #0B5ED7
+
+    // Header
+    doc.setFillColor(245, 247, 250); // bg-gray-50
+    doc.rect(0, 0, 210, 40, 'F');
+
+    // Logo (Texto Simulado ou Imagem se possível, aqui usando texto estilizado)
+    doc.setFontSize(22);
+    doc.setTextColor(10, 10, 10);
+    doc.setFont("helvetica", "bold");
+    doc.text("CENTRO 4.0", 14, 20);
+
+    doc.setFontSize(10);
+    doc.setTextColor(11, 94, 215);
+    doc.text("PARKING MANAGER", 14, 26);
+
+    // Título do Relatório
+    doc.setFontSize(16);
+    doc.setTextColor(30, 30, 30);
+    doc.text("Relatório de Inteligência", 14, 55);
+
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Gerado em: ${new Date().toLocaleString()}`, 14, 62);
+
+    // Resumo Estatístico (Simples)
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text("Resumo Executivo:", 14, 75);
+
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`• Total de Alertas/Logs: ${stats.totalAlerts}`, 20, 82);
+    doc.text(`• Índice de Conformidade: ${stats.efficiency}`, 20, 88);
+    doc.text(`• Visitantes Ativos: ${stats.visitors}`, 20, 94);
+    doc.text(`• Expirações Próximas: ${stats.expiringSoon}`, 20, 100);
+
+    // Tabela de Logs
+    const tableColumn = ["Data/Hora", "Operador", "Ação", "Detalhes"];
+    const tableRows = logs.map(log => [
+      new Date(log.timestamp).toLocaleString(),
+      log.profiles?.name || 'Sistema',
+      log.action,
+      log.details
+    ]);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 110,
+      theme: 'grid',
+      headStyles: { fillColor: [11, 94, 215], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 8, cellPadding: 3 },
+      alternateRowStyles: { fillColor: [248, 250, 252] }
+    });
+
+    // Rodapé
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text(`Página ${i} de ${pageCount} - Documento Confidencial Centro 4.0`, 105, 290, { align: 'center' });
+    }
+
+    doc.save(`relatorio-centro4.0-${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
 
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-700">
@@ -53,11 +125,11 @@ const Reports: React.FC = () => {
           <h1 className="text-3xl font-black text-gray-900 font-poppins tracking-tight">Business Intelligence</h1>
           <p className="text-gray-500 text-sm font-medium">Extração de dados e auditoria de conformidade.</p>
         </div>
-        <button 
-          onClick={handlePrint}
+        <button
+          onClick={handleGeneratePDF}
           className="flex items-center gap-2 bg-gray-900 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-2xl hover:-translate-y-1"
         >
-          <Printer className="w-4 h-4" /> Gerar Relatório PDF
+          <Printer className="w-4 h-4" /> Exportar PDF Oficial
         </button>
       </div>
 
@@ -85,7 +157,7 @@ const Reports: React.FC = () => {
             <Filter className="w-3 h-3" /> Filtrar Período
           </button>
         </div>
-        
+
         <div className="overflow-x-auto">
           {loading ? (
             <div className="py-24 flex justify-center"><Loader2 className="w-10 h-10 text-blue-600 animate-spin" /></div>

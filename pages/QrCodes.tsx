@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Printer, Copy, Check, QrCode as QrIcon, ShieldCheck, Users, Loader2, ExternalLink, AlertCircle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import jsPDF from 'jspdf';
 
 const QrCodes: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -36,6 +37,86 @@ const QrCodes: React.FC = () => {
     // Garante que o pathname termine com / para não quebrar query params
     const cleanPath = pathname.endsWith('/') ? pathname : pathname + '/';
     return `${origin}${cleanPath}?profile=${user.id}`;
+  };
+
+  const generateBadgePDF = async () => {
+    if (!selectedUser) return;
+
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: [100, 150] // Tamanho personalizado estilo crachá/cartão
+    });
+
+    // Fundo e Borda
+    doc.setFillColor(255, 255, 255);
+    doc.rect(0, 0, 100, 150, 'F');
+
+    doc.setLineWidth(2);
+    doc.setDrawColor(30, 30, 30);
+    doc.roundedRect(5, 5, 90, 140, 5, 5, 'S');
+
+    // Header Azul
+    doc.setFillColor(37, 99, 235); // blue-600
+    doc.rect(20, 15, 60, 2, 'F');
+
+    // Título
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(20, 20, 20);
+    doc.text("ESTACIONAMENTO", 50, 25, { align: "center" });
+
+    doc.setFontSize(10);
+    doc.setTextColor(37, 99, 235);
+    doc.text("CENTRO 4.0", 50, 30, { align: "center" });
+
+    // QR Code (precisa carregar a imagem ou usar o link gerado)
+    // Aqui vamos usar o link da API que já está gerando a imagem
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(generatePublicLink(selectedUser))}`;
+
+    try {
+      // Carregar imagem como base64 para o PDF (hack usando canvas ou fetch se possível, mas aqui jsPDF addImage suporta URL em alguns casos ou precisa de img data)
+      // Para simplificar e garantir funcionamento sem CORS complexo, vamos adicionar o link como texto também ou tentar desenhar
+      // Nota: jsPDF addImage com URL pode falhar por CORS.
+      // Melhor abordagem segura: Link explicito. Mas o usuário quer "vir bonitinho".
+      // Vamos tentar usar a imagem. Se falhar, o usuário verá o erro no console, mas podemos usar um placeholder.
+
+      const img = new Image();
+      img.src = qrUrl;
+      img.crossOrigin = "Anonymous";
+
+      // Esperar carregar (promessa simples)
+      await new Promise((resolve) => {
+        img.onload = resolve;
+        // Fallback rápido se demorar
+        setTimeout(resolve, 2000);
+      });
+
+      doc.addImage(img, 'PNG', 15, 40, 70, 70);
+    } catch (e) {
+      doc.text("[Erro ao carregar QR]", 50, 70, { align: "center" });
+    }
+
+    // Placa
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text("PLACA OFICIAL", 50, 115, { align: "center" });
+
+    doc.setFillColor(245, 247, 250); // bg-gray-50
+    doc.roundedRect(20, 118, 60, 12, 2, 2, 'F');
+
+    doc.setFont("courier", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(0);
+    doc.text(selectedUser.vehicles?.[0]?.plate || "ABC-0000", 50, 126, { align: "center" });
+
+    // Nome
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(80, 80, 80);
+    doc.text(selectedUser.name, 50, 140, { align: "center" });
+
+    doc.save(`cracha-${selectedUser.name.replace(/\s+/g, '-').toLowerCase()}.pdf`);
   };
 
   const copyLink = () => {
@@ -134,10 +215,10 @@ const QrCodes: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-12 w-full max-w-[360px]">
                   <button
-                    onClick={() => window.print()}
+                    onClick={generateBadgePDF}
                     className="flex items-center justify-center gap-3 py-5 bg-gray-950 text-white rounded-[28px] font-black uppercase text-[10px] tracking-widest hover:bg-black transition-all shadow-2xl shadow-gray-200"
                   >
-                    <Printer className="w-5 h-5" /> Imprimir Card
+                    <Printer className="w-5 h-5" /> Imprimir Card PDF
                   </button>
                   <button
                     onClick={copyLink}
