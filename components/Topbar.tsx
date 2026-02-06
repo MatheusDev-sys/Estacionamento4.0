@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Search, User, ChevronDown, LogOut, Settings as SettingsIcon, Activity } from 'lucide-react';
+import { Bell, Search, User, ChevronDown, LogOut, Settings as SettingsIcon, Activity, Menu } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 interface TopbarProps {
@@ -8,14 +8,15 @@ interface TopbarProps {
   onSearch: (term: string) => void;
   onNavigate: (page: string) => void;
   onLogout: () => void;
+  onToggleSidebar: () => void; // Nova prop
 }
 
-const Topbar: React.FC<TopbarProps> = ({ searchTerm, onSearch, onNavigate, onLogout }) => {
+const Topbar: React.FC<TopbarProps> = ({ searchTerm, onSearch, onNavigate, onLogout, onToggleSidebar }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [adminProfile, setAdminProfile] = useState({ name: 'Carregando...', email: '', avatar: '' });
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
-  
+
   const profileRef = useRef<HTMLDivElement>(null);
   const notifyRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +42,7 @@ const Topbar: React.FC<TopbarProps> = ({ searchTerm, onSearch, onNavigate, onLog
 
     getProfile();
     getNotifications();
-    
+
     // Escutar mudanças no perfil para atualizar o Topbar em tempo real
     const profileSubscription = supabase
       .channel('profile_changes')
@@ -69,11 +70,20 @@ const Topbar: React.FC<TopbarProps> = ({ searchTerm, onSearch, onNavigate, onLog
   };
 
   return (
-    <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-30 no-print">
-      <div className="relative w-96 group">
+    <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 no-print gap-4">
+
+      {/* Botão Menu Hambúrguer (Mobile Only) */}
+      <button
+        onClick={onToggleSidebar}
+        className="lg:hidden p-2 text-gray-400 hover:text-blue-600 transition-colors"
+      >
+        <Menu className="w-6 h-6" />
+      </button>
+
+      <div className="relative flex-1 max-w-sm group">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
-        <input 
-          type="text" 
+        <input
+          type="text"
           value={searchTerm}
           placeholder="Pesquisar por placa ou nome..."
           onChange={(e) => onSearch(e.target.value)}
@@ -83,7 +93,7 @@ const Topbar: React.FC<TopbarProps> = ({ searchTerm, onSearch, onNavigate, onLog
 
       <div className="flex items-center gap-6">
         <div className="relative" ref={notifyRef}>
-          <button 
+          <button
             onClick={() => setShowNotifications(!showNotifications)}
             className={`relative p-2.5 rounded-xl transition-all ${showNotifications ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-blue-600 hover:bg-gray-50'}`}
           >
@@ -116,7 +126,7 @@ const Topbar: React.FC<TopbarProps> = ({ searchTerm, onSearch, onNavigate, onLog
         <div className="h-8 w-px bg-gray-100"></div>
 
         <div className="relative" ref={profileRef}>
-          <div 
+          <div
             onClick={() => setShowProfile(!showProfile)}
             className="flex items-center gap-3 cursor-pointer group p-1 pr-3 rounded-2xl hover:bg-gray-50 transition-all"
           >
@@ -137,20 +147,20 @@ const Topbar: React.FC<TopbarProps> = ({ searchTerm, onSearch, onNavigate, onLog
                 <p className="text-[10px] text-gray-500 truncate mt-1">{adminProfile.email}</p>
               </div>
               <div className="p-2">
-                <button 
+                <button
                   onClick={() => handleNav('profile')}
                   className="w-full flex items-center gap-3 px-4 py-3.5 text-xs text-gray-700 font-bold hover:bg-blue-50 hover:text-blue-600 rounded-2xl transition-all"
                 >
                   <User className="w-4 h-4" /> Perfil
                 </button>
-                <button 
+                <button
                   onClick={() => handleNav('settings')}
                   className="w-full flex items-center gap-3 px-4 py-3.5 text-xs text-gray-700 font-bold hover:bg-blue-50 hover:text-blue-600 rounded-2xl transition-all"
                 >
                   <SettingsIcon className="w-4 h-4" /> Configurações
                 </button>
                 <div className="h-px bg-gray-50 my-1 mx-2"></div>
-                <button 
+                <button
                   onClick={onLogout}
                   className="w-full flex items-center gap-3 px-4 py-3.5 text-xs text-red-500 font-black uppercase tracking-widest hover:bg-red-50 rounded-2xl transition-all"
                 >

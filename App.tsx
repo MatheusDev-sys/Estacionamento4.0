@@ -18,12 +18,13 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [globalSearch, setGlobalSearch] = useState('');
   const [publicProfileId, setPublicProfileId] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Estado do Menu Mobile
 
   const checkUrlParams = () => {
     // Detecta ?profile=ID na URL
     const params = new URLSearchParams(window.location.search);
     const profileId = params.get('profile');
-    
+
     if (profileId) {
       console.log("Detectado Perfil Público via URL:", profileId);
       setPublicProfileId(profileId);
@@ -44,13 +45,13 @@ const App: React.FC = () => {
       }
       setIsLoading(false);
     }
-    
+
     checkUser();
 
     // Listener para mudanças de navegação (popstate)
     const handleUrlChange = () => checkUrlParams();
     window.addEventListener('popstate', handleUrlChange);
-    
+
     // Intervalo de segurança para detectar mudanças via scripts sem recarga
     const interval = setInterval(checkUrlParams, 300);
 
@@ -61,7 +62,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleLogin = () => setIsAuthenticated(true);
-  
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsAuthenticated(false);
@@ -110,19 +111,26 @@ const App: React.FC = () => {
 
   return (
     <div className="flex bg-[#F6F8FA] min-h-screen">
-      <Sidebar activePage={activePage} onNavigate={setActivePage} onLogout={handleLogout} />
-      
-      <main className="flex-1 ml-64 min-h-screen">
-        <Topbar 
+      <Sidebar
+        activePage={activePage}
+        onNavigate={setActivePage}
+        onLogout={handleLogout}
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+      />
+
+      <main className="flex-1 lg:ml-64 ml-0 min-h-screen transition-all duration-300">
+        <Topbar
           searchTerm={globalSearch}
+          onToggleSidebar={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           onSearch={(term) => {
             setGlobalSearch(term);
             if (term.length > 0 && activePage !== 'management') {
               setActivePage('management');
             }
-          }} 
-          onNavigate={setActivePage} 
-          onLogout={handleLogout} 
+          }}
+          onNavigate={setActivePage}
+          onLogout={handleLogout}
         />
         <div className="relative">
           {renderContent()}
