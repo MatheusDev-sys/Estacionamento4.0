@@ -37,7 +37,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <div className="max-w-md w-full glass-effect rounded-[56px] p-12 shadow-2xl relative z-10 border border-white/10 bg-white/95 reveal">
         <div className="flex flex-col items-center mb-10">
           <div className="mb-6">
-            <img src="/logo.png" alt="Centro 4.0" className="w-48 h-auto" />
+            <img src="logo.png" alt="Centro 4.0" className="w-48 h-auto" />
           </div>
           <p className="text-blue-600 text-[11px] font-black uppercase tracking-[0.4em] mt-2">Gestor de Estacionamento</p>
         </div>
