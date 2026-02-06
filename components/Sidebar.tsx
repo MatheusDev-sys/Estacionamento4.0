@@ -29,7 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout }) =
     <aside className="w-64 bg-white h-screen fixed left-0 top-0 border-r border-gray-100 flex flex-col z-40">
       <div className="p-6 flex items-center gap-3">
         <div className="flex items-center">
-          <img src="/logo.png" alt="Centro 4.0" className="h-12 w-auto" />
+          <img src="logo.png" alt="Centro 4.0" className="h-24 w-auto" />
         </div>
       </div>
 
